@@ -7,14 +7,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WoohooDX12", "WoohooDX12\Wo
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Release|x64 = Release|x64
+		Dbg|x64 = Dbg|x64
+		FullSpeed|x64 = FullSpeed|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7B64AC73-9EB4-4CC1-A4B0-080006B92FCE}.Debug|x64.ActiveCfg = Debug|x64
-		{7B64AC73-9EB4-4CC1-A4B0-080006B92FCE}.Debug|x64.Build.0 = Debug|x64
-		{7B64AC73-9EB4-4CC1-A4B0-080006B92FCE}.Release|x64.ActiveCfg = Release|x64
-		{7B64AC73-9EB4-4CC1-A4B0-080006B92FCE}.Release|x64.Build.0 = Release|x64
+		{7B64AC73-9EB4-4CC1-A4B0-080006B92FCE}.Dbg|x64.ActiveCfg = Dbg|x64
+		{7B64AC73-9EB4-4CC1-A4B0-080006B92FCE}.Dbg|x64.Build.0 = Dbg|x64
+		{7B64AC73-9EB4-4CC1-A4B0-080006B92FCE}.FullSpeed|x64.ActiveCfg = FullSpeed|x64
+		{7B64AC73-9EB4-4CC1-A4B0-080006B92FCE}.FullSpeed|x64.Build.0 = FullSpeed|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
