@@ -69,7 +69,7 @@ namespace WoohooDX12
     // Graphics API structures
     IDXGIFactory4* m_factory = nullptr;
     IDXGIAdapter1* m_adapter = nullptr;
-#ifdef DX12_DEBUG
+#ifdef DX12_DEBUG_LAYER
     ID3D12Debug1* m_debugController = nullptr;
     ID3D12DebugDevice* m_debugDevice = nullptr;
 #endif

@@ -136,7 +136,7 @@ namespace WoohooDX12
 
     // Create factory
     uint32 dxgiFactoryFlags = 0;
-#ifdef DX12_DEBUG
+#ifdef DX12_DEBUG_LAYER
     ID3D12Debug* debugController;
     ReturnIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
     ReturnIfFailed(debugController->QueryInterface(IID_PPV_ARGS(&m_debugController)));
@@ -178,7 +178,7 @@ namespace WoohooDX12
     ReturnIfFailed(D3D12CreateDevice(m_adapter, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_device)));
     m_device->SetName(L"Main Device");
 
-#ifdef DX12_DEBUG
+#ifdef DX12_DEBUG_LAYER
     // Get debug device
     ReturnIfFailed(m_device->QueryInterface(&m_debugDevice));
 #endif
@@ -645,7 +645,7 @@ namespace WoohooDX12
 
     ID3DBlob* errors = nullptr;
 
-#ifdef DX12_DEBUG
+#ifdef DX12_DEBUG_LAYER
     // Enable better shader debugging with the graphics debugging tools.
     uint32 compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #else
@@ -887,7 +887,7 @@ namespace WoohooDX12
       m_factory = nullptr;
     }
 
-#ifdef DX12_DEBUG
+#ifdef DX12_DEBUG_LAYER
     if (m_debugController)
     {
       m_debugController->Release();

@@ -146,7 +146,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>XGFX_DIRECTX12=1;XWIN_WIN32=1;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>XGFX_DIRECTX12=1;XWIN_WIN32=1;NDEBUG;_CONSOLE;DX12_DEBUG_LAYER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependency/crosswindow/src;$(SolutionDir)WoohooDX12/Source;$(SolutionDir)WoohooDX12/Source/Core;$(SolutionDir)WoohooDX12/Source/Core/Graphics;$(SolutionDir)Dependency/crosswindow-graphics/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
