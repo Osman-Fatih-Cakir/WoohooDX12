@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 #include <string>
+#include <memory>
 
 typedef unsigned int uint32;
 typedef unsigned short uint16;

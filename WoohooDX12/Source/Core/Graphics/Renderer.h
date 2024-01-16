@@ -6,24 +6,11 @@
 #include "Types.h"
 #include "Defines.h"
 #include "../App/MainWindow.h"
+#include "Material.h"
+#include "Mesh.h"
 
 namespace WoohooDX12
 {
-  struct Vertex
-  {
-    float position[3];
-    float color[3];
-  };
-
-  // TODO Use MVP matrix
-  // Uniform data
-  struct
-  {
-    Mat projectionMatrix;
-    Mat viewMatrix;
-    Mat modelMatrix;
-  } uboVS;
-
   class Renderer
   {
   public:
@@ -41,8 +28,7 @@ namespace WoohooDX12
     bool InitResources();
     bool SetupCommands();
     bool InitFrameBuffer();
-    bool CompileShaders(ID3DBlob** vertexShader, ID3DBlob** fragmentShader);
-    bool CreateCommands();
+    bool CreateCommands(ID3D12PipelineState* pipelineState);
 
     bool SetupSwapchain(uint32 width, uint32 height);
 
@@ -52,19 +38,14 @@ namespace WoohooDX12
     bool DestroyFrameBuffer();
 
   private:
-    constexpr static Vertex m_vertexBufferData[3] =
-    {
-      {{0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-      {{0.5f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-      {{-0.5f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}
-    };
-
-    constexpr static uint32 m_indexBufferData[3] = { 0, 1, 2 };
     constexpr static uint32 m_backbufferCount = 2;
 
     void* m_window = nullptr; // This is needed for swapchain creation
     uint32 m_width = 1280;
     uint32 m_height = 720;
+
+    std::shared_ptr<Mesh> m_mesh = nullptr;
+    std::shared_ptr<Material> m_material = nullptr;
 
     // Graphics API structures
     IDXGIFactory4* m_factory = nullptr;
@@ -89,19 +70,7 @@ namespace WoohooDX12
     D3D12_VIEWPORT m_viewport;
     D3D12_RECT m_surfaceSize;
 
-    ID3D12Resource* m_vertexBuffer = nullptr;
-    ID3D12Resource* m_indexBuffer = nullptr;
-
-    ID3D12Resource* m_uniformBuffer = nullptr;
-    ID3D12DescriptorHeap* m_uniformBufferHeap = nullptr;
-    UINT8* m_mappedUniformBuffer = nullptr;
-
-    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-    D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
-
     uint32 m_rtvDescriptorSize;
-    ID3D12RootSignature* m_rootSignature = nullptr;
-    ID3D12PipelineState* m_pipelineState = nullptr;
 
     // Sync
     uint32 m_frameIndex;

@@ -6,7 +6,7 @@
 
 #define SafeDel(ptr) { delete ptr; ptr = nullptr; }
 
-#define ReturnIfFalse(func) if(!func) return false;
+#define ReturnIfFalse(expression) if(!expression) return false;
 
 #define AssertAndReturn(expression, text) assert(expression && text); if (!(expression)) return false;
 
