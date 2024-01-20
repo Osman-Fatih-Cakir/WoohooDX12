@@ -7,8 +7,8 @@ namespace WoohooDX12
   class MainWindow
   {
   public:
-    bool Create(int width, int height);
-    bool Close();
+    int Create(int width, int height);
+    int Close();
 
     inline xwin::WindowDesc GetDesc() { return m_window->getDesc(); }
     inline int GetWidth() { return m_width; }

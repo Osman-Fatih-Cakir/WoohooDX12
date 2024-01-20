@@ -1,11 +1,11 @@
 #include "Mesh.h"
 
 #include "Utils.h"
-#include "RendererUtils.h"
+#include "d3dx12.h"
 
 namespace WoohooDX12
 {
-  bool Mesh::Init(ID3D12Device* device)
+  int Mesh::Init(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
   {
     AssertAndReturn(!m_initialized, "This mesh is already initialized.");
 
@@ -13,13 +13,13 @@ namespace WoohooDX12
     {
       const uint32 vertexBufferSize = sizeof(m_vertexBufferData);
 
-      //TODO use vertex buffer on GPU memory
-      D3D12_HEAP_PROPERTIES heapProps = {};
-      heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
-      heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-      heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-      heapProps.CreationNodeMask = 1;
-      heapProps.VisibleNodeMask = 1;
+      // Upload heap buffer to upload vertex data to gpu mem
+      D3D12_HEAP_PROPERTIES uploadheapProps = {};
+      uploadheapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+      uploadheapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+      uploadheapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+      uploadheapProps.CreationNodeMask = 1;
+      uploadheapProps.VisibleNodeMask = 1;
 
       D3D12_RESOURCE_DESC vertexBufferResourceDesc = {};
       vertexBufferResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
@@ -34,38 +34,51 @@ namespace WoohooDX12
       vertexBufferResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
       vertexBufferResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-      ReturnIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &vertexBufferResourceDesc,
-        D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_vertexBuffer)));
+      ReturnIfFailed(device->CreateCommittedResource(&uploadheapProps, D3D12_HEAP_FLAG_NONE, &vertexBufferResourceDesc,
+        D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_uploadVertexBuffer)));
 
-      // Copy the triangle data to the vertex buffer.
-      uint8* pVertexDataBegin = nullptr;
+      // default heap holds vertex buffer
+      D3D12_HEAP_PROPERTIES defaultheapProps = {};
+      defaultheapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+      defaultheapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+      defaultheapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+      defaultheapProps.CreationNodeMask = 1;
+      defaultheapProps.VisibleNodeMask = 1;
 
-      // We do not intend to read from this resource on the CPU.
-      D3D12_RANGE readRange = {};
-      readRange.Begin = 0;
-      readRange.End = 0;
-
-      ReturnIfFailed(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
-      memcpy(pVertexDataBegin, m_vertexBufferData, sizeof(m_vertexBufferData));
-      m_vertexBuffer->Unmap(0, nullptr);
+      ReturnIfFailed(device->CreateCommittedResource(&defaultheapProps, D3D12_HEAP_FLAG_NONE, &vertexBufferResourceDesc,
+        D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr, IID_PPV_ARGS(&m_vertexBuffer)));
 
       // Initialize the vertex buffer view.
       m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
       m_vertexBufferView.StrideInBytes = sizeof(Vertex);
       m_vertexBufferView.SizeInBytes = vertexBufferSize;
+
+      D3D12_SUBRESOURCE_DATA vertexData = {};
+      vertexData.pData = m_vertexBufferData;
+      vertexData.RowPitch = sizeof(m_vertexBufferData);
+      vertexData.SlicePitch = 0;
+
+      // upload vertex data to gpu memory
+      const CD3DX12_RESOURCE_BARRIER firstBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+        D3D12_RESOURCE_STATE_COPY_DEST);
+      const CD3DX12_RESOURCE_BARRIER secondBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST,
+        D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+
+      commandList->ResourceBarrier(1, &firstBarrier);
+      UpdateSubresources(commandList, m_vertexBuffer, m_uploadVertexBuffer, 0, 0, 1, &vertexData);
+      commandList->ResourceBarrier(1, &secondBarrier);
     }
 
     // Create index buffer
     {
       const uint32 indexBufferSize = sizeof(m_indexBufferData);
 
-      //TODO use GPU memory
-      D3D12_HEAP_PROPERTIES heapProps = {};
-      heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
-      heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-      heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-      heapProps.CreationNodeMask = 1;
-      heapProps.VisibleNodeMask = 1;
+      D3D12_HEAP_PROPERTIES uploadHeapProps = {};
+      uploadHeapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+      uploadHeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+      uploadHeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+      uploadHeapProps.CreationNodeMask = 1;
+      uploadHeapProps.VisibleNodeMask = 1;
 
       D3D12_RESOURCE_DESC indexBufferResourceDesc = {};
       indexBufferResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
@@ -80,33 +93,59 @@ namespace WoohooDX12
       indexBufferResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
       indexBufferResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-      ReturnIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &indexBufferResourceDesc,
-        D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_indexBuffer)));
+      ReturnIfFailed(device->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE, &indexBufferResourceDesc,
+        D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_uploadIndexBuffer)));
 
-      // Copy the triangle data to the vertex buffer.
-      uint8* pVertexDataBegin = nullptr;
+      D3D12_HEAP_PROPERTIES defaultHeapProps = {};
+      defaultHeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+      defaultHeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+      defaultHeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+      defaultHeapProps.CreationNodeMask = 1;
+      defaultHeapProps.VisibleNodeMask = 1;
 
-      // We do not intend to read from this resource on the CPU.
-      D3D12_RANGE readRange = {};
-      readRange.Begin = 0;
-      readRange.End = 0;
-
-      ReturnIfFailed(m_indexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
-      memcpy(pVertexDataBegin, m_indexBufferData, sizeof(m_indexBufferData));
-      m_indexBuffer->Unmap(0, nullptr);
+      ReturnIfFailed(device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE, &indexBufferResourceDesc,
+        D3D12_RESOURCE_STATE_INDEX_BUFFER, nullptr, IID_PPV_ARGS(&m_indexBuffer)));
 
       // Initialize the index buffer view.
       m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
       m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
       m_indexBufferView.SizeInBytes = indexBufferSize;
+
+      D3D12_SUBRESOURCE_DATA indexData = {};
+      indexData.pData = m_indexBufferData;
+      indexData.RowPitch = sizeof(m_indexBufferData);
+      indexData.SlicePitch = 0;
+
+      // upload index data to gpu memory
+      const CD3DX12_RESOURCE_BARRIER firstBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_indexBuffer, D3D12_RESOURCE_STATE_INDEX_BUFFER,
+        D3D12_RESOURCE_STATE_COPY_DEST);
+      const CD3DX12_RESOURCE_BARRIER secondBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_indexBuffer, D3D12_RESOURCE_STATE_COPY_DEST,
+        D3D12_RESOURCE_STATE_INDEX_BUFFER);
+
+      commandList->ResourceBarrier(1, &firstBarrier);
+      UpdateSubresources(commandList, m_indexBuffer, m_uploadIndexBuffer, 0, 0, 1, &indexData);
+      commandList->ResourceBarrier(1, &secondBarrier);
     }
 
-    return true;
+    return 0;
   }
 
-  bool Mesh::UnUnit()
+  int Mesh::UnUnit()
   {
-    ReturnIfFalse(m_initialized);
+    if (!m_initialized)
+      return 0;
+
+    if (m_uploadVertexBuffer)
+    {
+      m_uploadVertexBuffer->Release();
+      m_uploadVertexBuffer = nullptr;
+    }
+
+    if (m_uploadIndexBuffer)
+    {
+      m_uploadIndexBuffer->Release();
+      m_uploadIndexBuffer = nullptr;
+    }
 
     if (m_vertexBuffer)
     {
@@ -120,6 +159,6 @@ namespace WoohooDX12
       m_indexBuffer = nullptr;
     }
 
-    return true;
+    return 0;
   }
 }

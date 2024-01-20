@@ -3,7 +3,6 @@
 #include <cassert>
 #include "CrossWindow/Graphics.h"
 #include "Maths.h"
-#include "RendererUtils.h"
 #include "Utils.h"
 
 namespace WoohooDX12
@@ -30,22 +29,22 @@ namespace WoohooDX12
     m_mesh = nullptr;
   }
 
-  bool Renderer::Init(uint32 width, uint32 height, void* windowPtr)
+  int Renderer::Init(uint32 width, uint32 height, void* windowPtr)
   {
     m_window = windowPtr;
     m_width = width;
     m_height = height;
 
-    ReturnIfFalse(InitAPI());
+    ReturnIfFailed(InitAPI());
 
-    ReturnIfFalse(InitResources());
+    ReturnIfFailed(InitResources());
 
-    ReturnIfFalse(SetupCommands());
+    ReturnIfFailed(SetupCommands());
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::UnInit()
+  int Renderer::UnInit()
   {
     if (m_swapchain != nullptr)
     {
@@ -62,10 +61,10 @@ namespace WoohooDX12
 
     DestroyAPI();
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::Resize(uint32 width, uint32 height)
+  int Renderer::Resize(uint32 width, uint32 height)
   {
     m_width = width;
     m_height = height;
@@ -84,14 +83,14 @@ namespace WoohooDX12
       WaitForSingleObjectEx(m_fenceEvent, INFINITE, false);
     }
 
-    ReturnIfFalse(DestroyFrameBuffer());
-    ReturnIfFalse(SetupSwapchain(width, height));
-    ReturnIfFalse(InitFrameBuffer());
+    ReturnIfFailed(DestroyFrameBuffer());
+    ReturnIfFailed(SetupSwapchain(width, height));
+    ReturnIfFailed(InitFrameBuffer());
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::Render()
+  int Renderer::Render()
   {
     // Update Uniforms
     m_material->Update();
@@ -121,10 +120,10 @@ namespace WoohooDX12
 
     m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::InitAPI()
+  int Renderer::InitAPI()
   {
     Log("Initializing API...", LogType::LT_INFO);
 
@@ -195,21 +194,28 @@ namespace WoohooDX12
 
     Log("API has been initialized.", LogType::LT_INFO);
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::InitResources()
+  int Renderer::InitResources()
   {
     Log("Initializing API resources...", LogType::LT_INFO);
 
-    m_material->Init(m_device);
+    ReturnIfFailed(m_material->Init(m_device));
 
-    ReturnIfFalse(CreateCommands(m_material->m_pipelineState));
+    ReturnIfFailed(CreateCommands(m_material->m_pipelineState));
 
     // Command lists are created in the recording state, but there is nothing to record yet. The main loop expects it to be closed, so close it now.
     ReturnIfFailed(m_commandList->Close());
+    ReturnIfFailed(m_commandAllocator->Reset());
+    ReturnIfFailed(m_commandList->Reset(m_commandAllocator, m_material->m_pipelineState));
 
-    m_mesh->Init(m_device);
+    ReturnIfFailed(m_mesh->Init(m_device, m_commandList));
+
+    // Execute upload commands
+    ReturnIfFailed(m_commandList->Close());
+    ID3D12CommandList* ppCommandLists[] = { m_commandList };
+    m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
     // Create synchronization objects and wait until assets have been uploaded to the GPU.
     {
@@ -242,10 +248,10 @@ namespace WoohooDX12
 
     Log("API resources has been initialized.", LogType::LT_INFO);
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::SetupCommands()
+  int Renderer::SetupCommands()
   {
     // Command list allocators can only be reset when the associated
     // command lists have finished execution on the GPU; apps should use
@@ -305,10 +311,10 @@ namespace WoohooDX12
 
     ReturnIfFailed(m_commandList->Close());
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::InitFrameBuffer()
+  int Renderer::InitFrameBuffer()
   {
     m_currentBuffer = m_swapchain->GetCurrentBackBufferIndex();
 
@@ -337,19 +343,19 @@ namespace WoohooDX12
       }
     }
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::CreateCommands(ID3D12PipelineState* pipelineState)
+  int Renderer::CreateCommands(ID3D12PipelineState* pipelineState)
   {
     // Create the command list.
     ReturnIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator, pipelineState, IID_PPV_ARGS(&m_commandList)));
     m_commandList->SetName(L"Main Command List");
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::SetupSwapchain(uint32 width, uint32 height)
+  int Renderer::SetupSwapchain(uint32 width, uint32 height)
   {
     m_surfaceSize.left = 0;
     m_surfaceSize.top = 0;
@@ -391,15 +397,15 @@ namespace WoohooDX12
       }
       else
       {
-        return false;
+        return -1;
       }
     }
     m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::DestroyCommands()
+  int Renderer::DestroyCommands()
   {
     if (m_commandList)
     {
@@ -423,10 +429,10 @@ namespace WoohooDX12
       m_commandList = nullptr;
     }
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::DestroyFrameBuffer()
+  int Renderer::DestroyFrameBuffer()
   {
     for (uint32 i = 0; i < m_backbufferCount; ++i)
     {
@@ -442,10 +448,10 @@ namespace WoohooDX12
       m_rtvHeap = nullptr;
     }
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::DestroyResources()
+  int Renderer::DestroyResources()
   {
     // Sync
     CloseHandle(m_fenceEvent);
@@ -453,10 +459,10 @@ namespace WoohooDX12
     m_mesh->UnUnit();
     m_material->UnInit();
 
-    return true;
+    return 0;
   }
 
-  bool Renderer::DestroyAPI()
+  int Renderer::DestroyAPI()
   {
     if (m_fence)
     {
@@ -513,7 +519,7 @@ namespace WoohooDX12
     }
 #endif
 
-    return true;
+    return 0;
   }
 
 }

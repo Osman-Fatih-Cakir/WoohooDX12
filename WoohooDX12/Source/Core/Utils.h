@@ -6,7 +6,8 @@
 
 #define SafeDel(ptr) { delete ptr; ptr = nullptr; }
 
-#define ReturnIfFalse(expression) if(!expression) return false;
+#define ReturnIfFailed(hr) { if (FAILED(hr)) return -1; }
+#define ThrowIfFailed(hr) { if (FAILED(hr)) throw new std::exception(); }
 
 #define AssertAndReturn(expression, text) assert(expression && text); if (!(expression)) return false;
 

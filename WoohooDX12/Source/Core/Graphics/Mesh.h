@@ -25,8 +25,8 @@ namespace WoohooDX12
     Mesh() {}
     virtual ~Mesh() {}
 
-    bool Init(ID3D12Device* device);
-    bool UnUnit();
+    int Init(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+    int UnUnit();
 
   private:
     Vertex m_vertexBufferData[3] =
@@ -38,14 +38,16 @@ namespace WoohooDX12
 
     uint32 m_indexBufferData[3] = { 0, 1, 2 };
 
-    ID3D12Resource* m_vertexBuffer = nullptr;
-    ID3D12Resource* m_indexBuffer = nullptr;
+    ID3D12Resource* m_uploadVertexBuffer = nullptr;
+    ID3D12Resource* m_vertexBuffer = nullptr; // On Video memory
+    ID3D12Resource* m_uploadIndexBuffer = nullptr;
+    ID3D12Resource* m_indexBuffer = nullptr; // On Video memory
 
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
     bool m_initialized = false;
 
-    //TODO later: let mesh hold its material type
+    //TODO later: let mesh hold its type
   };
 }

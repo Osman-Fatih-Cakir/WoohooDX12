@@ -15,20 +15,20 @@ namespace WoohooDX12
     Material();
     virtual ~Material() { UnInit(); }
 
-    bool Init(ID3D12Device* device);
-    bool UnInit();
+    int Init(ID3D12Device* device);
+    int UnInit();
 
-    bool Update();
+    int Update();
 
   private:
-    bool CompileShaders(ID3DBlob** vertexShader, ID3DBlob** pixelShader);
+    int CompileShaders(ID3DBlob** vertexShader, ID3DBlob** pixelShader);
 
   private:
     // Uniform data
 
     struct UboVS
     {
-    // TODO Use MVP matrix
+      // TODO Use MVP matrix
       Mat projectionMatrix;
       Mat viewMatrix;
       Mat modelMatrix;

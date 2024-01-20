@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <d3dcompiler.h>
-#include "RendererUtils.h"
 #include "Maths.h"
 #include "Utils.h"
 
@@ -18,7 +17,7 @@ namespace WoohooDX12
     MakeIdentity(m_uboVS.modelMatrix);
   }
 
-  bool Material::Init(ID3D12Device* device)
+  int Material::Init(ID3D12Device* device)
   {
     AssertAndReturn(!m_initialized, "This material is already initialized.");
 
@@ -72,7 +71,7 @@ namespace WoohooDX12
         Log(errStr, LogType::LT_ERROR);
         error->Release();
         error = nullptr;
-        return false;
+        return -1;
       }
 
       if (signature)
@@ -86,7 +85,7 @@ namespace WoohooDX12
     {
       ID3DBlob* vertexShader = nullptr;
       ID3DBlob* pixelShader = nullptr;
-      ReturnIfFalse(CompileShaders(&vertexShader, &pixelShader));
+      ReturnIfFailed(CompileShaders(&vertexShader, &pixelShader));
 
       // Define the vertex input layout
       D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
@@ -97,7 +96,6 @@ namespace WoohooDX12
 
       // Create the UBO
 
-      //TODO use default heap for vertex buffer
       D3D12_HEAP_PROPERTIES heapProps = {};
       heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
       heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -227,10 +225,10 @@ namespace WoohooDX12
       }
     }
 
-    return true;
+    return 0;
   }
 
-  bool Material::UnInit()
+  int Material::UnInit()
   {
     if (m_pipelineState)
     {
@@ -256,10 +254,10 @@ namespace WoohooDX12
       m_uniformBufferHeap = nullptr;
     }
 
-    return true;
-    }
+    return 0;
+  }
 
-  bool Material::CompileShaders(ID3DBlob** vertexShader, ID3DBlob** pixelShader)
+  int Material::CompileShaders(ID3DBlob** vertexShader, ID3DBlob** pixelShader)
   {
     Log("Compiling shaders...", LogType::LT_INFO);
 
@@ -282,25 +280,25 @@ namespace WoohooDX12
     if (!SUCCEEDED(compileResult))
     {
       if (errors == nullptr)
-        return false;
+        return -1;
 
       const char* errStr = (const char*)errors->GetBufferPointer();
       Log(errStr, LogType::LT_ERROR);
       errors->Release();
       errors = nullptr;
-      return false;
+      return -1;
     }
     compileResult = D3DCompileFromFile(fragPath.c_str(), nullptr, nullptr, "main", "ps_5_0", compileFlags, 0, pixelShader, &errors);
     if (!SUCCEEDED(compileResult))
     {
       if (errors == nullptr)
-        return false;
+        return -1;
 
       const char* errStr = (const char*)errors->GetBufferPointer();
       Log(errStr, LogType::LT_ERROR);
       errors->Release();
       errors = nullptr;
-      return false;
+      return -1;
     }
 
     std::ofstream vsOut(vertCompiledPath, std::ios::out | std::ios::binary);
@@ -311,10 +309,10 @@ namespace WoohooDX12
 
     Log("Done: Compiling shaders.", LogType::LT_INFO);
 
-    return true;
+    return 0;
   }
 
-  bool Material::Update()
+  int Material::Update()
   {
     m_uboVS.modelMatrix *= DirectX::XMMatrixRotationAxis(DirectX::XMLoadFloat3(&UpVector), DirectX::XMConvertToRadians(1.0f));
 
@@ -325,5 +323,7 @@ namespace WoohooDX12
     ReturnIfFailed(m_uniformBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedUniformBuffer)));
     memcpy(m_mappedUniformBuffer, &m_uboVS, sizeof(m_uboVS));
     m_uniformBuffer->Unmap(0, &readRange);
+
+    return 0;
   }
-  }
+}

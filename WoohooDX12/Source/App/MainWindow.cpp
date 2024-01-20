@@ -4,7 +4,7 @@
 
 namespace WoohooDX12
 {
-  bool MainWindow::Create(int width, int height)
+  int MainWindow::Create(int width, int height)
   {
     m_width = width;
     m_height = height;
@@ -24,15 +24,15 @@ namespace WoohooDX12
     if (!m_window->create(wdesc, *m_eventQueue))
     {
       Log("Window creation has failed.", LogType::LT_ERROR);
-      return false;
+      return -1;
     };
 
-    return true;
+    return 0;
   }
-  bool MainWindow::Close()
+  int MainWindow::Close()
   {
     m_window->close();
 
-    return true;
+    return 0;
   }
 }

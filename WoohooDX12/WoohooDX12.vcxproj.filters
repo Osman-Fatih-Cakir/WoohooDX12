@@ -50,9 +50,6 @@
     <ClInclude Include="Source\Core\Types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Core\Graphics\RendererUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Core\Maths.h">
       <Filter>Header Files</Filter>
     </ClInclude>

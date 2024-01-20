@@ -17,14 +17,14 @@ namespace WoohooDX12
     SafeDel(m_window);
   }
 
-  bool App::Init()
+  int App::Init()
   {
     // Create window
-    ReturnIfFalse(m_window->Create(1280, 720));
+    ReturnIfFailed(m_window->Create(1280, 720));
 
-    ReturnIfFalse(m_renderer->Init(1280, 720, m_window->m_window));
+    ReturnIfFailed(m_renderer->Init(1280, 720, m_window->m_window));
 
-    return true;
+    return 0;
   }
 
   void App::Run()

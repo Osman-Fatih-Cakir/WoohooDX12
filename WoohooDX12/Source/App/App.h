@@ -10,7 +10,7 @@ namespace WoohooDX12
   public:
     App();
     ~App();
-    bool Init();
+    int Init();
     void Run();
 
   public:

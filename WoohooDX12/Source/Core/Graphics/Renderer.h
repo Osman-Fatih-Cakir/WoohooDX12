@@ -17,25 +17,25 @@ namespace WoohooDX12
     Renderer();
     ~Renderer();
 
-    bool Init(uint32 width, uint32 height, void* windowPtr);
-    bool UnInit();
-    bool Resize(uint32 width, uint32 height);
+    int Init(uint32 width, uint32 height, void* windowPtr);
+    int UnInit();
+    int Resize(uint32 width, uint32 height);
 
-    bool Render();
+    int Render();
 
   protected:
-    bool InitAPI();
-    bool InitResources();
-    bool SetupCommands();
-    bool InitFrameBuffer();
-    bool CreateCommands(ID3D12PipelineState* pipelineState);
+    int InitAPI();
+    int InitResources();
+    int SetupCommands();
+    int InitFrameBuffer();
+    int CreateCommands(ID3D12PipelineState* pipelineState);
 
-    bool SetupSwapchain(uint32 width, uint32 height);
+    int SetupSwapchain(uint32 width, uint32 height);
 
-    bool DestroyAPI();
-    bool DestroyResources();
-    bool DestroyCommands();
-    bool DestroyFrameBuffer();
+    int DestroyAPI();
+    int DestroyResources();
+    int DestroyCommands();
+    int DestroyFrameBuffer();
 
   private:
     constexpr static uint32 m_backbufferCount = 2;
