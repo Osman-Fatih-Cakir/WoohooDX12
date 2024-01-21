@@ -87,13 +87,6 @@ namespace WoohooDX12
       ID3DBlob* pixelShader = nullptr;
       ReturnIfFailed(CompileShaders(&vertexShader, &pixelShader));
 
-      // Define the vertex input layout
-      D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
-      {
-          {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-          {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
-      };
-
       // Create the UBO
 
       D3D12_HEAP_PROPERTIES heapProps = {};
@@ -145,6 +138,12 @@ namespace WoohooDX12
       m_uniformBuffer->Unmap(0, &readRange);
 
       // Describe and create the graphics pipeline state object (PSO)
+      D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
+      {
+          {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+          {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+      };
+
       D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
       psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
       psoDesc.pRootSignature = m_rootSignature;
