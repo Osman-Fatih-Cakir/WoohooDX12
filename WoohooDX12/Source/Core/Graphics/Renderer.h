@@ -13,39 +13,41 @@ namespace WoohooDX12
 {
   class Renderer
   {
+    friend class SceneRenderer;
+
   public:
     Renderer();
     ~Renderer();
 
     int Init(uint32 width, uint32 height, void* windowPtr);
-    int UnInit();
+    int UnInit(std::vector<std::shared_ptr<Material>>& materials);
     int Resize(uint32 width, uint32 height);
 
-    int Render();
+    int Render(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
 
   protected:
     int InitAPI();
-    int InitResources();
-    int SetupCommands();
+    int InitResources(std::vector<std::shared_ptr<Material>>& materials);
+    int SetupCommands(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
     int InitFrameBuffer();
-    int CreateCommands(ID3D12PipelineState* pipelineState);
 
     int SetupSwapchain(uint32 width, uint32 height);
 
     int DestroyAPI();
     int DestroyResources();
-    int DestroyCommands();
+    int DestroyCommands(std::vector<std::shared_ptr<Material>>& materials);
     int DestroyFrameBuffer();
 
   private:
     constexpr static uint32 m_backbufferCount = 2;
 
+    bool m_initialized = false;
     void* m_window = nullptr; // This is needed for swapchain creation
     uint32 m_width = 1280;
     uint32 m_height = 720;
 
-    std::shared_ptr<Mesh> m_mesh = nullptr;
-    std::shared_ptr<Material> m_material = nullptr;
+    //std::shared_ptr<Mesh> m_mesh = nullptr;
+    //std::shared_ptr<Material> m_material = nullptr;
 
     // Graphics API structures
     IDXGIFactory4* m_factory = nullptr;
@@ -58,7 +60,6 @@ namespace WoohooDX12
     ID3D12Device* m_device = nullptr;
     ID3D12CommandQueue* m_commandQueue = nullptr;
     ID3D12CommandAllocator* m_commandAllocator = nullptr;
-    ID3D12GraphicsCommandList* m_commandList = nullptr;
 
     // Current Frame
     uint32 m_currentBuffer = 0;

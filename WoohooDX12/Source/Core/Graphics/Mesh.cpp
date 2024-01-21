@@ -5,6 +5,12 @@
 
 namespace WoohooDX12
 {
+  Mesh::~Mesh()
+  {
+    // UnInit should be called externally
+    assert(!m_initialized && "Mesh is not uninitialized!");
+  }
+
   int Mesh::Init(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
   {
     AssertAndReturn(!m_initialized, "This mesh is already initialized.");
@@ -130,7 +136,7 @@ namespace WoohooDX12
     return 0;
   }
 
-  int Mesh::UnUnit()
+  int Mesh::UnInit()
   {
     if (!m_initialized)
       return 0;

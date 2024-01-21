@@ -17,7 +17,13 @@ namespace WoohooDX12
     MakeIdentity(m_uboVS.modelMatrix);
   }
 
-  int Material::Init(ID3D12Device* device)
+  Material::~Material()
+  {
+    // UnInit should be called externally
+    assert(!m_initialized && "Material is not uninitialized!");
+  }
+
+  int Material::Init(ID3D12Device* device, ID3D12CommandAllocator* commandAllocator)
   {
     AssertAndReturn(!m_initialized, "This material is already initialized.");
 
@@ -224,11 +230,22 @@ namespace WoohooDX12
       }
     }
 
+    // Create the command list.
+    ReturnIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, m_pipelineState, IID_PPV_ARGS(&m_commandList)));
+    m_commandList->SetName(L"Main Material Command List");
+
+    ReturnIfFailed(m_commandList->Close());
+    ReturnIfFailed(commandAllocator->Reset());
+    ReturnIfFailed(m_commandList->Reset(commandAllocator, m_pipelineState));
+
     return 0;
   }
 
   int Material::UnInit()
   {
+    if (!m_initialized)
+      return 0;
+
     if (m_pipelineState)
     {
       m_pipelineState->Release();

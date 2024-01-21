@@ -23,10 +23,10 @@ namespace WoohooDX12
     // vertex buffers
 
     Mesh() {}
-    virtual ~Mesh() {}
+    virtual ~Mesh();
 
     int Init(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-    int UnUnit();
+    int UnInit();
 
   private:
     Vertex m_vertexBufferData[3] =

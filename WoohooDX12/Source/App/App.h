@@ -1,7 +1,8 @@
 #pragma once
 
+#include <memory>
 #include "MainWindow.h"
-#include "Renderer.h"
+#include "SceneRenderer.h"
 
 namespace WoohooDX12
 {
@@ -13,9 +14,13 @@ namespace WoohooDX12
     int Init();
     void Run();
 
+  private:
+    int InitScene();
+
   public:
-    MainWindow* m_window = nullptr;
-    Renderer* m_renderer = nullptr;
+    std::shared_ptr<MainWindow> m_window = nullptr;
+    std::shared_ptr<Scene> m_scene = nullptr;
+    std::shared_ptr<SceneRenderer> m_sceneRenderer = nullptr;
     bool m_quit = false;
   };
 }

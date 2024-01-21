@@ -209,6 +209,9 @@
     <ClCompile Include="Source\Core\Graphics\Material.cpp" />
     <ClCompile Include="Source\Core\Graphics\Mesh.cpp" />
     <ClCompile Include="Source\Core\Graphics\Renderer.cpp" />
+    <ClCompile Include="Source\Core\Graphics\SceneRenderer.cpp" />
+    <ClCompile Include="Source\Core\Scene\Entity.cpp" />
+    <ClCompile Include="Source\Core\Scene\Scene.cpp" />
     <ClCompile Include="Source\EntryPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -216,10 +219,12 @@
     <ClInclude Include="Source\App\MainWindow.h" />
     <ClInclude Include="Source\Core\Graphics\Material.h" />
     <ClInclude Include="Source\Core\Graphics\Mesh.h" />
+    <ClInclude Include="Source\Core\Graphics\PrimitiveMeshes.h" />
     <ClInclude Include="Source\Core\Graphics\Renderer.h" />
     <ClInclude Include="Source\Core\Graphics\SceneRenderer.h" />
     <ClInclude Include="Source\Core\Maths.h" />
     <ClInclude Include="Source\Core\Scene\Entity.h" />
+    <ClInclude Include="Source\Core\Scene\PrimitiveEntities.h" />
     <ClInclude Include="Source\Core\Scene\Scene.h" />
     <ClInclude Include="Source\Core\Types.h" />
     <ClInclude Include="Source\Core\Utils.h" />

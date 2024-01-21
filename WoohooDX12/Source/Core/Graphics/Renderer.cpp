@@ -14,38 +14,35 @@ namespace WoohooDX12
     {
       m_renderTargets[i] = nullptr;
     }
-
-    m_mesh = std::make_shared<Mesh>();
-    m_material = std::make_shared<Material>();
   }
-  
+
   Renderer::~Renderer()
   {
-    m_material->UnInit();
-    m_mesh->UnUnit();
-    UnInit();
-
-    m_material = nullptr;
-    m_mesh = nullptr;
+    // UnInit should be called externally!
+    assert(!m_initialized && "Renderer is not uninitialized!");
   }
 
   int Renderer::Init(uint32 width, uint32 height, void* windowPtr)
   {
+    if (m_initialized)
+      return -1;
+
     m_window = windowPtr;
     m_width = width;
     m_height = height;
 
     ReturnIfFailed(InitAPI());
 
-    ReturnIfFailed(InitResources());
-
-    ReturnIfFailed(SetupCommands());
+    m_initialized = true;
 
     return 0;
   }
 
-  int Renderer::UnInit()
+  int Renderer::UnInit(std::vector<std::shared_ptr<Material>>& materials)
   {
+    if (!m_initialized)
+      return 0;
+
     if (m_swapchain != nullptr)
     {
       m_swapchain->SetFullscreenState(false, nullptr);
@@ -53,13 +50,15 @@ namespace WoohooDX12
       m_swapchain = nullptr;
     }
 
-    DestroyCommands();
+    DestroyCommands(materials);
 
     DestroyFrameBuffer();
 
     DestroyResources();
 
     DestroyAPI();
+
+    m_initialized = false;
 
     return 0;
   }
@@ -90,17 +89,17 @@ namespace WoohooDX12
     return 0;
   }
 
-  int Renderer::Render()
+  int Renderer::Render(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material)
   {
     // Update Uniforms
-    m_material->Update();
+    material->Update();
 
     // Record all the commands we need to render the scene into the command
     // list.
-    SetupCommands();
+    SetupCommands(mesh, material);
 
     // Execute the command list.
-    ID3D12CommandList* ppCommandLists[] = { m_commandList };
+    ID3D12CommandList* ppCommandLists[] = { material->m_commandList };
     m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
     m_swapchain->Present(1, 0);
 
@@ -197,25 +196,14 @@ namespace WoohooDX12
     return 0;
   }
 
-  int Renderer::InitResources()
+  int Renderer::InitResources(std::vector<std::shared_ptr<Material>>& materials)
   {
     Log("Initializing API resources...", LogType::LT_INFO);
 
-    ReturnIfFailed(m_material->Init(m_device));
-
-    ReturnIfFailed(CreateCommands(m_material->m_pipelineState));
-
-    // Command lists are created in the recording state, but there is nothing to record yet. The main loop expects it to be closed, so close it now.
-    ReturnIfFailed(m_commandList->Close());
-    ReturnIfFailed(m_commandAllocator->Reset());
-    ReturnIfFailed(m_commandList->Reset(m_commandAllocator, m_material->m_pipelineState));
-
-    ReturnIfFailed(m_mesh->Init(m_device, m_commandList));
-
-    // Execute upload commands
-    ReturnIfFailed(m_commandList->Close());
-    ID3D12CommandList* ppCommandLists[] = { m_commandList };
-    m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+    for (std::shared_ptr<Material> material : materials)
+    {
+      ReturnIfFailed(material->Init(m_device, m_commandAllocator));
+    }
 
     // Create synchronization objects and wait until assets have been uploaded to the GPU.
     {
@@ -251,7 +239,7 @@ namespace WoohooDX12
     return 0;
   }
 
-  int Renderer::SetupCommands()
+  int Renderer::SetupCommands(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material)
   {
     // Command list allocators can only be reset when the associated
     // command lists have finished execution on the GPU; apps should use
@@ -261,18 +249,18 @@ namespace WoohooDX12
     // However, when ExecuteCommandList() is called on a particular command
     // list, that command list can then be reset at any time and must be before
     // re-recording.
-    ReturnIfFailed(m_commandList->Reset(m_commandAllocator, m_material->m_pipelineState));
+    ReturnIfFailed(material->m_commandList->Reset(m_commandAllocator, material->m_pipelineState));
 
     // Set necessary state.
-    m_commandList->SetGraphicsRootSignature(m_material->m_rootSignature);
-    m_commandList->RSSetViewports(1, &m_viewport);
-    m_commandList->RSSetScissorRects(1, &m_surfaceSize);
+    material->m_commandList->SetGraphicsRootSignature(material->m_rootSignature);
+    material->m_commandList->RSSetViewports(1, &m_viewport);
+    material->m_commandList->RSSetScissorRects(1, &m_surfaceSize);
 
-    ID3D12DescriptorHeap* pDescriptorHeaps[] = { m_material->m_uniformBufferHeap };
-    m_commandList->SetDescriptorHeaps(_countof(pDescriptorHeaps), pDescriptorHeaps);
+    ID3D12DescriptorHeap* pDescriptorHeaps[] = { material->m_uniformBufferHeap };
+    material->m_commandList->SetDescriptorHeaps(_countof(pDescriptorHeaps), pDescriptorHeaps);
 
-    D3D12_GPU_DESCRIPTOR_HANDLE srvHandle(m_material->m_uniformBufferHeap->GetGPUDescriptorHandleForHeapStart());
-    m_commandList->SetGraphicsRootDescriptorTable(0, srvHandle);
+    D3D12_GPU_DESCRIPTOR_HANDLE srvHandle(material->m_uniformBufferHeap->GetGPUDescriptorHandleForHeapStart());
+    material->m_commandList->SetGraphicsRootDescriptorTable(0, srvHandle);
 
     // Indicate that the back buffer will be used as a render target.
     D3D12_RESOURCE_BARRIER renderTargetBarrier = {};
@@ -283,20 +271,20 @@ namespace WoohooDX12
     renderTargetBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     renderTargetBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-    m_commandList->ResourceBarrier(1, &renderTargetBarrier);
+    material->m_commandList->ResourceBarrier(1, &renderTargetBarrier);
 
     D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
     rtvHandle.ptr = rtvHandle.ptr + (m_frameIndex * m_rtvDescriptorSize);
-    m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+    material->m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
     // Record commands.
     const float clearColor[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-    m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_commandList->IASetVertexBuffers(0, 1, &m_mesh->m_vertexBufferView);
-    m_commandList->IASetIndexBuffer(&m_mesh->m_indexBufferView);
+    material->m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+    material->m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    material->m_commandList->IASetVertexBuffers(0, 1, &mesh->m_vertexBufferView);
+    material->m_commandList->IASetIndexBuffer(&mesh->m_indexBufferView);
 
-    m_commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
+    material->m_commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
 
     // Indicate that the back buffer will now be used to present.
     D3D12_RESOURCE_BARRIER presentBarrier;
@@ -307,9 +295,9 @@ namespace WoohooDX12
     presentBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
     presentBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-    m_commandList->ResourceBarrier(1, &presentBarrier);
+    material->m_commandList->ResourceBarrier(1, &presentBarrier);
 
-    ReturnIfFailed(m_commandList->Close());
+    ReturnIfFailed(material->m_commandList->Close());
 
     return 0;
   }
@@ -342,15 +330,6 @@ namespace WoohooDX12
         rtvHandle.ptr += (1 * m_rtvDescriptorSize);
       }
     }
-
-    return 0;
-  }
-
-  int Renderer::CreateCommands(ID3D12PipelineState* pipelineState)
-  {
-    // Create the command list.
-    ReturnIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator, pipelineState, IID_PPV_ARGS(&m_commandList)));
-    m_commandList->SetName(L"Main Command List");
 
     return 0;
   }
@@ -405,14 +384,14 @@ namespace WoohooDX12
     return 0;
   }
 
-  int Renderer::DestroyCommands()
+  int Renderer::DestroyCommands(std::vector<std::shared_ptr<Material>>& materials)
   {
-    if (m_commandList)
+    for (std::shared_ptr<Material> material : materials)
     {
-      m_commandList->Reset(m_commandAllocator, m_material->m_pipelineState);
-      m_commandList->ClearState(m_material->m_pipelineState);
-      ReturnIfFailed(m_commandList->Close());
-      ID3D12CommandList* ppCommandLists[] = { m_commandList };
+      material->m_commandList->Reset(m_commandAllocator, material->m_pipelineState);
+      material->m_commandList->ClearState(material->m_pipelineState);
+      ReturnIfFailed(material->m_commandList->Close());
+      ID3D12CommandList* ppCommandLists[] = { material->m_commandList };
       m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
       // Wait for GPU to finish work
@@ -425,8 +404,8 @@ namespace WoohooDX12
         WaitForSingleObject(m_fenceEvent, INFINITE);
       }
 
-      m_commandList->Release();
-      m_commandList = nullptr;
+      material->m_commandList->Release();
+      material->m_commandList = nullptr;
     }
 
     return 0;
@@ -455,9 +434,6 @@ namespace WoohooDX12
   {
     // Sync
     CloseHandle(m_fenceEvent);
-
-    m_mesh->UnUnit();
-    m_material->UnInit();
 
     return 0;
   }

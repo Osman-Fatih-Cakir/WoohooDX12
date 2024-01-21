@@ -7,14 +7,16 @@ namespace WoohooDX12
 {
   App::App()
   {
-    m_window = new MainWindow();
-    m_renderer = new Renderer();
+    m_window = std::make_shared<MainWindow>();
+    m_scene = std::make_shared<Scene>();
+    m_sceneRenderer = std::make_shared<SceneRenderer>();
   }
 
   App::~App()
   {
-    SafeDel(m_renderer);
-    SafeDel(m_window);
+    m_sceneRenderer = nullptr;
+    m_window = nullptr;
+    m_scene = nullptr;
   }
 
   int App::Init()
@@ -22,8 +24,10 @@ namespace WoohooDX12
     // Create window
     ReturnIfFailed(m_window->Create(1280, 720));
 
-    ReturnIfFailed(m_renderer->Init(1280, 720, m_window->m_window));
+    InitScene();
 
+    ReturnIfFailed(m_sceneRenderer->Init(1280, 720, m_window->m_window));
+    
     return 0;
   }
 
@@ -42,7 +46,7 @@ namespace WoohooDX12
         if (event.type == xwin::EventType::Resize)
         {
           const xwin::ResizeData& data = event.data.resize;
-          m_renderer->Resize(data.width, data.height);
+          m_sceneRenderer->Resize(data.width, data.height);
           shouldRender = false;
         }
 
@@ -56,12 +60,20 @@ namespace WoohooDX12
         m_window->m_eventQueue->pop();
       }
 
-      //TODO App Update
-
       if (shouldRender)
       {
-        m_renderer->Render();
+        int check = m_sceneRenderer->Render();
+        m_quit = check < 0 ? true : false;
       }
     }
+
+    m_sceneRenderer->UnInit();
+  }
+
+  int App::InitScene()
+  {
+    m_scene->AddTriangle();
+
+    ReturnIfFailed(m_sceneRenderer->SetScene(m_scene));
   }
 }

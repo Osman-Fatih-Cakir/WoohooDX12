@@ -10,12 +10,13 @@ namespace WoohooDX12
   class Material
   {
     friend class Renderer;
+    friend class SceneRenderer;
 
   public:
     Material();
-    virtual ~Material() { UnInit(); }
+    virtual ~Material();
 
-    int Init(ID3D12Device* device);
+    int Init(ID3D12Device* device, ID3D12CommandAllocator* commandAllocator);
     int UnInit();
 
     int Update();
@@ -41,6 +42,7 @@ namespace WoohooDX12
 
     ID3D12RootSignature* m_rootSignature = nullptr;
     ID3D12PipelineState* m_pipelineState = nullptr;
+    ID3D12GraphicsCommandList* m_commandList = nullptr;
 
     bool m_initialized = false;
   };
