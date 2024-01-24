@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WoohooDX12", "WoohooDX12\WoohooDX12.vcxproj", "{7B64AC73-9EB4-4CC1-A4B0-080006B92FCE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{18E0558E-B04A-4160-ABF3-0B60FE591CCC} = {18E0558E-B04A-4160-ABF3-0B60FE591CCC}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImGui", "ImGui\ImGui.vcxproj", "{18E0558E-B04A-4160-ABF3-0B60FE591CCC}"
 EndProject

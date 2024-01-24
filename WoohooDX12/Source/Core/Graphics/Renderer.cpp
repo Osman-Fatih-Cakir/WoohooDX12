@@ -1,7 +1,6 @@
 #include "Renderer.h"
 
 #include <cassert>
-#include "CrossWindow/Graphics.h"
 #include "Maths.h"
 #include "Utils.h"
 
@@ -22,12 +21,12 @@ namespace WoohooDX12
     assert(!m_initialized && "Renderer is not uninitialized!");
   }
 
-  int Renderer::Init(uint32 width, uint32 height, void* windowPtr)
+  int Renderer::Init(uint32 width, uint32 height, HWND hwnd)
   {
     if (m_initialized)
       return -1;
 
-    m_window = windowPtr;
+    m_hwnd = hwnd;
     m_width = width;
     m_height = height;
 
@@ -364,20 +363,9 @@ namespace WoohooDX12
       swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
       swapchainDesc.SampleDesc.Count = 1;
 
-      assert(m_window != nullptr);
-
-      AssertAndReturn(m_window != nullptr, "Renderer does not have window.");
-
-      IDXGISwapChain1* swapchain = xgfx::createSwapchain((xwin::Window*)m_window, m_factory, m_commandQueue, &swapchainDesc);
-      HRESULT swapchainSupport = swapchain->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&swapchain);
-      if (SUCCEEDED(swapchainSupport))
-      {
-        m_swapchain = (IDXGISwapChain3*)swapchain;
-      }
-      else
-      {
-        return -1;
-      }
+      IDXGISwapChain1* swapchain = nullptr;
+      ReturnIfFailed(m_factory->CreateSwapChainForHwnd(m_commandQueue, m_hwnd, &swapchainDesc, nullptr, nullptr, &swapchain));
+      m_swapchain = (IDXGISwapChain3*)swapchain; // I have no idea why
     }
     m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 

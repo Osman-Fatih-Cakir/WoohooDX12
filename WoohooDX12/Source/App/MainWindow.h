@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CrossWindow/CrossWindow.h"
+#include <Windows.h>
 
 namespace WoohooDX12
 {
@@ -10,13 +10,11 @@ namespace WoohooDX12
     int Create(int width, int height);
     int Close();
 
-    inline xwin::WindowDesc GetDesc() { return m_window->getDesc(); }
     inline int GetWidth() { return m_width; }
     inline int GetHeight() { return m_height; }
 
   public:
-    xwin::Window* m_window = nullptr;
-    xwin::EventQueue* m_eventQueue = nullptr;
+    HWND g_hwnd = 0;
 
   private:
     int m_width = 1280;

@@ -19,12 +19,12 @@ namespace WoohooDX12
     m_defaultMaterial = nullptr;
   }
 
-  int SceneRenderer::Init(uint32 width, uint32 height, void* windowPtr)
+  int SceneRenderer::Init(uint32 width, uint32 height, HWND hwnd)
   {
     if (m_initialized)
       return -1;
 
-    ReturnIfFailed(m_renderer->Init(width, height, windowPtr));
+    ReturnIfFailed(m_renderer->Init(width, height, hwnd));
     std::vector<std::shared_ptr<Material>> materials = { m_defaultMaterial };
     ReturnIfFailed(m_renderer->InitResources(materials));
 

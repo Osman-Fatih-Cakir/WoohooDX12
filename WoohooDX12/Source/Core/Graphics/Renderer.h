@@ -3,6 +3,7 @@
 #include <d3d12.h>
 #include <dxgi1_3.h>
 #include <dxgi1_4.h>
+#include <vector>
 #include "Types.h"
 #include "Defines.h"
 #include "../App/MainWindow.h"
@@ -19,7 +20,7 @@ namespace WoohooDX12
     Renderer();
     ~Renderer();
 
-    int Init(uint32 width, uint32 height, void* windowPtr);
+    int Init(uint32 width, uint32 height, HWND hwnd);
     int UnInit(std::vector<std::shared_ptr<Material>>& materials);
     int Resize(uint32 width, uint32 height);
 
@@ -42,7 +43,7 @@ namespace WoohooDX12
     constexpr static uint32 m_backbufferCount = 2;
 
     bool m_initialized = false;
-    void* m_window = nullptr; // This is needed for swapchain creation
+    HWND m_hwnd = nullptr; // window handle
     uint32 m_width = 1280;
     uint32 m_height = 720;
 

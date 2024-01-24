@@ -2,6 +2,7 @@
 
 #include "Utils.h"
 #include "Graphics/Renderer.h"
+#include "SDL.h"
 
 namespace WoohooDX12
 {
@@ -26,8 +27,8 @@ namespace WoohooDX12
 
     InitScene();
 
-    ReturnIfFailed(m_sceneRenderer->Init(1280, 720, m_window->m_window));
-    
+    ReturnIfFailed(m_sceneRenderer->Init(1280, 720, m_window->g_hwnd));
+
     return 0;
   }
 
@@ -37,33 +38,19 @@ namespace WoohooDX12
     {
       bool shouldRender = true;
 
-      m_window->m_eventQueue->update();
-
-      while (!m_window->m_eventQueue->empty())
+      SDL_Event sdlEvent;
+      while (SDL_PollEvent(&sdlEvent))
       {
-        const xwin::Event& event = m_window->m_eventQueue->front();
-
-        if (event.type == xwin::EventType::Resize)
+        if (sdlEvent.type == SDL_QUIT)
         {
-          const xwin::ResizeData& data = event.data.resize;
-          m_sceneRenderer->Resize(data.width, data.height);
-          shouldRender = false;
-        }
-
-        if (event.type == xwin::EventType::Close)
-        {
-          m_window->Close();
-          shouldRender = false;
           m_quit = true;
         }
-
-        m_window->m_eventQueue->pop();
       }
 
       if (shouldRender)
       {
         int check = m_sceneRenderer->Render();
-        m_quit = check < 0 ? true : false;
+        m_quit = m_quit || check < 0;
       }
     }
 
@@ -75,5 +62,7 @@ namespace WoohooDX12
     m_scene->AddTriangle();
 
     ReturnIfFailed(m_sceneRenderer->SetScene(m_scene));
+
+    return 0;
   }
 }
