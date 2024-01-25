@@ -121,6 +121,13 @@ namespace WoohooDX12
     return 0;
   }
 
+  int Renderer::RenderImGui()
+  {
+
+
+    return 0;
+  }
+
   int Renderer::InitAPI()
   {
     Log("Initializing API...", LogType::LT_INFO);

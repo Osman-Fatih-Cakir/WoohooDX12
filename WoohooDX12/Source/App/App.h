@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "MainWindow.h"
-#include "SceneRenderer.h"
+#include "WohCore.h"
 
 namespace WoohooDX12
 {
@@ -15,12 +15,13 @@ namespace WoohooDX12
     void Run();
 
   private:
+    int UnInit();
     int InitScene();
 
   public:
     std::shared_ptr<MainWindow> m_window = nullptr;
+    std::shared_ptr<WohCore> m_core = nullptr;
     std::shared_ptr<Scene> m_scene = nullptr;
-    std::shared_ptr<SceneRenderer> m_sceneRenderer = nullptr;
     bool m_quit = false;
   };
 }

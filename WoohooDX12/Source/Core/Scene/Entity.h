@@ -16,7 +16,7 @@ namespace WoohooDX12
   enum class EntityType
   {
     Primitive,
-    //TODO grass, terrain, etc.
+    // TODO grass, terrain, etc.
   };
 
   class Entity

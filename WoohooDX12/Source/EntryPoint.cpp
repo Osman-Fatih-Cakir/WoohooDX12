@@ -11,13 +11,19 @@
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
 {
-  WoohooDX12::App app;
-  while (!app.m_quit)
-  {
-    if (app.Init() != 0)
-      break;
+#if WOH_DEBUG
+  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
 
-    app.Run();
+  {
+    WoohooDX12::App app;
+    while (!app.m_quit)
+    {
+      if (app.Init() != 0)
+        break;
+
+      app.Run();
+    }
   }
 
 #if WOH_DEBUG

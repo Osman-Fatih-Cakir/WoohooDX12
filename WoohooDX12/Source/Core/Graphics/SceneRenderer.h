@@ -20,7 +20,7 @@ namespace WoohooDX12
     ~SceneRenderer();
 
     inline int SetScene(std::shared_ptr<Scene> scene) { ReturnIfFailed(UnInit()); m_scene = scene; return 0; }
-    int Init(uint32 width, uint32 height32, HWND hwnd);
+    int Init(std::shared_ptr<Renderer> renderer, uint32 width, uint32 height32, HWND hwnd);
     int UnInit();
     int Resize(uint32 width, uint32 height);
 

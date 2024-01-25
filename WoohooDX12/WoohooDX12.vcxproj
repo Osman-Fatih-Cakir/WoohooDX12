@@ -213,6 +213,7 @@
     <ClCompile Include="Source\Core\Graphics\SceneRenderer.cpp" />
     <ClCompile Include="Source\Core\Scene\Entity.cpp" />
     <ClCompile Include="Source\Core\Scene\Scene.cpp" />
+    <ClCompile Include="Source\Core\WohCore.cpp" />
     <ClCompile Include="Source\EntryPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +230,7 @@
     <ClInclude Include="Source\Core\Scene\Scene.h" />
     <ClInclude Include="Source\Core\Types.h" />
     <ClInclude Include="Source\Core\Utils.h" />
+    <ClInclude Include="Source\Core\WohCore.h" />
     <ClInclude Include="Source\Defines.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

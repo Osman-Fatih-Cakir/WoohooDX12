@@ -4,7 +4,6 @@ namespace WoohooDX12
 {
   SceneRenderer::SceneRenderer()
   {
-    m_renderer = std::make_shared<Renderer>();
     m_scene = std::make_shared<Scene>();
     m_defaultMaterial = std::make_shared<Material>();
   }
@@ -14,16 +13,16 @@ namespace WoohooDX12
     assert(!m_initialized && "Scene Renderer is uninitialized!");
 
     m_renderJobs.clear();
-    m_renderer = nullptr;
     m_scene = nullptr;
     m_defaultMaterial = nullptr;
   }
 
-  int SceneRenderer::Init(uint32 width, uint32 height, HWND hwnd)
+  int SceneRenderer::Init(std::shared_ptr<Renderer> renderer, uint32 width, uint32 height, HWND hwnd)
   {
     if (m_initialized)
       return -1;
 
+    m_renderer = renderer;
     ReturnIfFailed(m_renderer->Init(width, height, hwnd));
     std::vector<std::shared_ptr<Material>> materials = { m_defaultMaterial };
     ReturnIfFailed(m_renderer->InitResources(materials));

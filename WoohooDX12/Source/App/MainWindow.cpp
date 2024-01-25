@@ -18,6 +18,7 @@ namespace WoohooDX12
 
     return 0;
   }
+
   int MainWindow::Close()
   {
     return 0;

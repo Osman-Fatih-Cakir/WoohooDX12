@@ -15,18 +15,21 @@ namespace WoohooDX12
   class Renderer
   {
     friend class SceneRenderer;
+    friend class WohCore;
 
   public:
     Renderer();
     ~Renderer();
+
+  protected:
 
     int Init(uint32 width, uint32 height, HWND hwnd);
     int UnInit(std::vector<std::shared_ptr<Material>>& materials);
     int Resize(uint32 width, uint32 height);
 
     int Render(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
+    int RenderImGui();
 
-  protected:
     int InitAPI();
     int InitResources(std::vector<std::shared_ptr<Material>>& materials);
     int SetupCommands(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
@@ -46,9 +49,6 @@ namespace WoohooDX12
     HWND m_hwnd = nullptr; // window handle
     uint32 m_width = 1280;
     uint32 m_height = 720;
-
-    //std::shared_ptr<Mesh> m_mesh = nullptr;
-    //std::shared_ptr<Material> m_material = nullptr;
 
     // Graphics API structures
     IDXGIFactory4* m_factory = nullptr;

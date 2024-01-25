@@ -48,6 +48,6 @@ namespace WoohooDX12
 
     bool m_initialized = false;
 
-    //TODO later: let mesh hold its type
+    // TODO later: let mesh hold its type
   };
 }

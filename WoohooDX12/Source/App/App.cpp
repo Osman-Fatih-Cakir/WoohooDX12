@@ -9,15 +9,17 @@ namespace WoohooDX12
   App::App()
   {
     m_window = std::make_shared<MainWindow>();
+    m_core = std::make_shared<WohCore>();
     m_scene = std::make_shared<Scene>();
-    m_sceneRenderer = std::make_shared<SceneRenderer>();
   }
 
   App::~App()
   {
-    m_sceneRenderer = nullptr;
-    m_window = nullptr;
+    UnInit();
+
+    m_core = nullptr;
     m_scene = nullptr;
+    m_window = nullptr;
   }
 
   int App::Init()
@@ -27,7 +29,7 @@ namespace WoohooDX12
 
     InitScene();
 
-    ReturnIfFailed(m_sceneRenderer->Init(1280, 720, m_window->g_hwnd));
+    ReturnIfFailed(m_core->Init(1280, 720, m_window->g_hwnd, m_scene));
 
     return 0;
   }
@@ -47,21 +49,27 @@ namespace WoohooDX12
         }
       }
 
-      if (shouldRender)
+      if (shouldRender && !m_quit)
       {
-        int check = m_sceneRenderer->Render();
+        // TODO create a class that app can access Renderer via WohCore->GetRenderer()->RenderImGui()
+        int check = m_core->Render();
+
         m_quit = m_quit || check < 0;
       }
     }
+  }
 
-    m_sceneRenderer->UnInit();
+  int App::UnInit()
+  {
+    m_window->Close();
+    m_core->UnInit();
+
+    return 0;
   }
 
   int App::InitScene()
   {
     m_scene->AddTriangle();
-
-    ReturnIfFailed(m_sceneRenderer->SetScene(m_scene));
 
     return 0;
   }
