@@ -127,7 +127,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>XGFX_DIRECTX12=1;XWIN_WIN32=1;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)WoohooDX12/Source;$(SolutionDir)WoohooDX12/Source/Core;$(SolutionDir)WoohooDX12/Source/Core/Graphics;$(SolutionDir)Dependency/D3DX12;$(SolutionDir)Dependency/D3D12MemoryAllocator/include;$(SolutionDir)Dependency/SDL2-2.28.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)WoohooDX12/Source;$(SolutionDir)WoohooDX12/Source/Core;$(SolutionDir)WoohooDX12/Source/Core/Graphics;$(SolutionDir)Dependency/D3DX12;$(SolutionDir)Dependency/D3D12MemoryAllocator/include;$(SolutionDir)Dependency/SDL2-2.28.5/include;$(SolutionDir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>MaxSpeed</Optimization>
     </ClCompile>
@@ -148,7 +148,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>XGFX_DIRECTX12=1;XWIN_WIN32=1;_CONSOLE;DX12_DEBUG_LAYER;WOH_DEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)WoohooDX12/Source;$(SolutionDir)WoohooDX12/Source/Core;$(SolutionDir)WoohooDX12/Source/Core/Graphics;$(SolutionDir)Dependency/D3DX12;$(SolutionDir)Dependency/D3D12MemoryAllocator/include;$(SolutionDir)Dependency/SDL2-2.28.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)WoohooDX12/Source;$(SolutionDir)WoohooDX12/Source/Core;$(SolutionDir)WoohooDX12/Source/Core/Graphics;$(SolutionDir)Dependency/D3DX12;$(SolutionDir)Dependency/D3D12MemoryAllocator/include;$(SolutionDir)Dependency/SDL2-2.28.5/include;$(SolutionDir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -191,7 +191,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>XGFX_DIRECTX12=1;XWIN_WIN32=1;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)WoohooDX12/Source;$(SolutionDir)WoohooDX12/Source/Core;$(SolutionDir)WoohooDX12/Source/Core/Graphics;$(SolutionDir)Dependency/D3DX12;$(SolutionDir)Dependency/D3D12MemoryAllocator/include;$(SolutionDir)Dependency/SDL2-2.28.5/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)WoohooDX12/Source;$(SolutionDir)WoohooDX12/Source/Core;$(SolutionDir)WoohooDX12/Source/Core/Graphics;$(SolutionDir)Dependency/D3DX12;$(SolutionDir)Dependency/D3D12MemoryAllocator/include;$(SolutionDir)Dependency/SDL2-2.28.5/include;$(SolutionDir)ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>MaxSpeed</Optimization>
     </ClCompile>

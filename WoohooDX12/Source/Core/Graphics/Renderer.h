@@ -29,6 +29,7 @@ namespace WoohooDX12
 
     int Render(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
     int RenderImGui();
+    int PresentBackbuffer();
 
     int InitAPI();
     int InitResources(std::vector<std::shared_ptr<Material>>& materials);
@@ -65,6 +66,7 @@ namespace WoohooDX12
     // Current Frame
     uint32 m_currentBuffer = 0;
     ID3D12DescriptorHeap* m_rtvHeap = nullptr;
+    ID3D12DescriptorHeap* m_imguiHeap = nullptr; // srv cbv uav heap
     ID3D12Resource* m_renderTargets[m_backbufferCount];
     IDXGISwapChain3* m_swapchain = nullptr;
 
@@ -73,6 +75,7 @@ namespace WoohooDX12
     D3D12_RECT m_surfaceSize;
 
     uint32 m_rtvDescriptorSize;
+    uint32 m_imguiDescriptorSize;
 
     // Sync
     uint32 m_frameIndex;

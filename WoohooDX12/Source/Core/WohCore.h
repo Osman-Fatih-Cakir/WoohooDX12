@@ -19,6 +19,10 @@ namespace WoohooDX12
     int Render();
 
   private:
+    int InitImGui(HWND hwnd);
+    int RenderImGui();
+
+  private:
     bool m_initialized = false;
 
     std::shared_ptr<SceneRenderer> m_sceneRenderer = nullptr;

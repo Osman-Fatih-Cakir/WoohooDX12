@@ -100,23 +100,6 @@ namespace WoohooDX12
     // Execute the command list.
     ID3D12CommandList* ppCommandLists[] = { material->m_commandList };
     m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-    m_swapchain->Present(1, 0);
-
-    // WAITING FOR THE FRAME TO COMPLETE BEFORE CONTINUING IS NOT BEST PRACTICE.
-
-    // Signal and increment the fence value.
-    const UINT64 fence = m_fenceValue;
-    ReturnIfFailed(m_commandQueue->Signal(m_fence, fence));
-    m_fenceValue++;
-
-    // Wait until the previous frame is finished.
-    if (m_fence->GetCompletedValue() < fence)
-    {
-      ReturnIfFailed(m_fence->SetEventOnCompletion(fence, m_fenceEvent));
-      WaitForSingleObject(m_fenceEvent, INFINITE);
-    }
-
-    m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 
     return 0;
   }
@@ -124,6 +107,29 @@ namespace WoohooDX12
   int Renderer::RenderImGui()
   {
 
+
+    return 0;
+  }
+
+  int Renderer::PresentBackbuffer()
+  {
+    m_swapchain->Present(1, 0);
+
+    // WAITING FOR THE FRAME TO COMPLETE BEFORE CONTINUING IS NOT BEST PRACTICE.
+
+    // Signal and increment the fence value.
+    const UINT64 fence = m_fenceValue;
+    m_commandQueue->Signal(m_fence, fence);
+    m_fenceValue++;
+
+    // Wait until the previous frame is finished.
+    if (m_fence->GetCompletedValue() < fence)
+    {
+      m_fence->SetEventOnCompletion(fence, m_fenceEvent);
+      WaitForSingleObject(m_fenceEvent, INFINITE);
+    }
+
+    m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 
     return 0;
   }
@@ -322,6 +328,15 @@ namespace WoohooDX12
       ReturnIfFailed(m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
 
       m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+      D3D12_DESCRIPTOR_HEAP_DESC imguiHeapDesc = {};
+      imguiHeapDesc.NumDescriptors = m_backbufferCount;
+      imguiHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+      imguiHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+      ReturnIfFailed(m_device->CreateDescriptorHeap(&imguiHeapDesc, IID_PPV_ARGS(&m_imguiHeap)));
+
+      m_imguiDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+      
     }
 
     // Create frame resources.
@@ -420,6 +435,11 @@ namespace WoohooDX12
     {
       m_rtvHeap->Release();
       m_rtvHeap = nullptr;
+    }
+    if (m_imguiHeap)
+    {
+      m_imguiHeap->Release();
+      m_imguiHeap = nullptr;
     }
 
     return 0;
